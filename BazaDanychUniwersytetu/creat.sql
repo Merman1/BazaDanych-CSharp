@@ -1,0 +1,101 @@
+DROP TABLE HARMONOGRAMY CASCADE CONSTRAINT;
+DROP TABLE PRZEDMIOTY CASCADE CONSTRAINT;
+DROP TABLE STUDENCI CASCADE CONSTRAINT;
+DROP TABLE STYPENDIA CASCADE CONSTRAINT;
+DROP TABLE BIBLIOTEKA CASCADE CONSTRAINT;
+DROP TABLE KURSY CASCADE CONSTRAINT;
+DROP TABLE GRUPY CASCADE CONSTRAINT;
+DROP TABLE KIERUNKI CASCADE CONSTRAINT;
+DROP TABLE WYKLADOWCY CASCADE CONSTRAINT;
+
+---------------------------------------------CREATY---------------------------------------------
+
+CREATE TABLE WYKLADOWCY(
+Id_wykladowcy NUMBER CONSTRAINT wykladowca_pk PRIMARY KEY,
+Imie VARCHAR(20) NOT NULL,
+Nazwisko VARCHAR(20) NOT NULL,
+Stopien VARCHAR(25) NOT NULL CONSTRAINT stop_check CHECK (Stopien IN('in¿', 'mgr','dr','prof')),
+Wiek NUMBER NOT NULL CONSTRAINT ch_wiek CHECK ((Wiek>=0) AND (Wiek<111)),
+PESEL CHAR(11) NOT NULL CONSTRAINT osoba_uni UNIQUE,
+Telefon NUMBER(12) NOT NULL,
+E_mail VARCHAR(30) NOT NULL CONSTRAINT mail_uni UNIQUE,
+Miasto VARCHAR(30) NOT NULL,
+Ulica VARCHAR(30) NOT NULL,
+Nr NUMBER(10) NOT NULL
+);
+
+CREATE TABLE KIERUNKI(
+Id_kierunku NUMBER CONSTRAINT kierunek_pk PRIMARY KEY,
+Nazwa VARCHAR(60) NOT NULL,
+Wydzial VARCHAR(70) NOT NULL,
+Budynek VARCHAR(3) NOT NULL
+);
+
+CREATE TABLE GRUPY(
+Id_grupy NUMBER CONSTRAINT grupa_pk PRIMARY KEY,
+Id_kierunku NUMBER NOT NULL,
+Nazwa VARCHAR2(7) NOT NULL,
+CONSTRAINT gr_kier_fk FOREIGN KEY (Id_kierunku) REFERENCES KIERUNKI(Id_kierunku)
+);
+
+CREATE TABLE KURSY(
+Id_kursu NUMBER CONSTRAINT kurs_pk PRIMARY KEY,
+Nazwa VARCHAR2(50) NOT NULL,
+Ilosc_godzin NUMBER(3) NOT NULL
+);
+
+CREATE TABLE BIBLIOTEKA(
+Id_wypozyczenia NUMBER CONSTRAINT wyppzyczenie_pk PRIMARY KEY,
+Ilosc_wypo¿_ksi¹¿ NUMBER NOT NULL,
+Termin_oddania DATE NOT NULL
+);
+
+CREATE TABLE STYPENDIA(
+Id_stypendium NUMBER CONSTRAINT stypendium_pk PRIMARY KEY,
+Srednia NUMBER(3,2) NOT NULL,
+Decyzja VARCHAR(15) NOT NULL CONSTRAINT decyzja_check CHECK (Decyzja IN ('przyznano','nie przyznano')),
+Kwota NUMBER(5)
+);
+
+CREATE TABLE STUDENCI(
+Id_studenta NUMBER CONSTRAINT student_pk PRIMARY KEY,
+Imie VARCHAR(20) NOT NULL,
+Nazwisko VARCHAR(20) NOT NULL,
+Wiek NUMBER NOT NULL CONSTRAINT ch_wiek1 CHECK ((Wiek>=0) AND (Wiek<111)),
+PESEL CHAR(11) NOT NULL CONSTRAINT osoba_uni1 UNIQUE,
+Telefon NUMBER(12) NOT NULL,
+E_mail VARCHAR(30) NOT NULL CONSTRAINT mail_uni1 UNIQUE,
+Miasto VARCHAR(30) NOT NULL,
+Ulica VARCHAR(30) NOT NULL,
+Nr NUMBER(10) NOT NULL,
+Indeks NUMBER(5) NOT NULL,
+Forma_studiow VARCHAR2(15) CONSTRAINT student_forma_CHECK CHECK (Forma_studiow IN('stacjonarne', 'niestacjonarne')),
+Data_zakonczenia DATE NOT NULL,
+Id_grupy NUMBER NOT NULL,
+Id_stypendium NUMBER NOT NULL CONSTRAINT st3_unique UNIQUE,
+Id_wypozyczenia NUMBER CONSTRAINT st4_unique UNIQUE,
+CONSTRAINT st_gr_fk FOREIGN KEY (Id_grupy) REFERENCES GRUPY(Id_grupy),
+CONSTRAINT st_sp_fk FOREIGN KEY (Id_stypendium) REFERENCES STYPENDIA(Id_stypendium),
+CONSTRAINT st_wyp FOREIGN KEY (Id_wypozyczenia) REFERENCES BIBLIOTEKA(Id_wypozyczenia)
+);
+
+CREATE TABLE PRZEDMIOTY(
+Id_przedmiotu NUMBER CONSTRAINT przedmiot_pk PRIMARY KEY,
+Nazwa VARCHAR2(50) NOT NULL,
+Rodzaj VARCHAR(12) NOT NULL CONSTRAINT przedmiot_rodz_check CHECK (Rodzaj IN('wyk³ad','æwiczenia','projekt','laboratorium')),
+Ile_godzin NUMBER (2) NOT NULL,
+Id_kierunku NUMBER NOT NULL,
+CONSTRAINT prz_kier_fk FOREIGN KEY (Id_kierunku) REFERENCES KIERUNKI(Id_kierunku)
+);
+
+CREATE TABLE HARMONOGRAMY(
+Id_przedmiotu NUMBER NOT NULL,
+Tydzien VARCHAR2(13) CONSTRAINT tydz_check CHECK (Tydzien IN ('parzysty', 'nieparzysty')),
+Dzien_tygodnia VARCHAR(14) CONSTRAINT dzien_check CHECK (Dzien_tygodnia IN ('poniedzia³ek', 'wtorek', 'œroda', 'czwartek', 'pi¹tek', 'sobota','niedziela')),
+Sala NUMBER(3) NOT NULL,
+Id_grupy NUMBER NOT NULL,
+Id_wykladowcy NUMBER NOT NULL,
+CONSTRAINT har_pr_fk FOREIGN KEY (Id_przedmiotu) REFERENCES PRZEDMIOTY(Id_przedmiotu),
+CONSTRAINT har_gr_fk FOREIGN KEY (Id_grupy) REFERENCES GRUPY(Id_grupy),
+CONSTRAINT har_wk_fk FOREIGN KEY (Id_wykladowcy) REFERENCES WYKLADOWCY(Id_wykladowcy)
+);
